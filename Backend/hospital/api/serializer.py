@@ -50,14 +50,33 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
-class ProfileSerializer(serializers.ModelSerializer):
-  class Meta:
-    model=Profile
-    fields="__all__"
-# class UserSerializer(serializers.ModelSerializer):
-#   class Meta:
-#     model=User
-#     fields='__all__'
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'password']
+        extra_kwargs = {
+            'password': {'write_only': True, 'required': False},
+        }
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_new_password(self, value):
+        validate_password(value)  # Uses Django's built-in password validators
+        return value
+
+
 class PromptSerializer(serializers.Serializer):
     query = serializers.CharField(required=False, allow_blank=True)
     image = serializers.ImageField(required=False)
@@ -143,4 +162,58 @@ class BookAppointmentSlotSerializer(serializers.ModelSerializer):
         slot.patient = validated_data['patient']
         slot.save()
         return super().create(validated_data)
+class UserAppointmentSerializer(serializers.ModelSerializer):
+    patient_name = serializers.CharField(source='patient.username', read_only=True) #since the patient is the userid in BookAppointmentSlot model that is pointing to the User model,so since the username feild is not directly state in BookAppointmentSlot model we can pull it from the User model through patient id
+    doctor_name = serializers.CharField(source='slot.doctor.user.username', read_only=True)
+    date = serializers.DateTimeField(source='slot.date', read_only=True)
+    start_time = serializers.TimeField(source='slot.start_time', read_only=True)
+    end_time = serializers.TimeField(source='slot.end_time', read_only=True)
+    # status and notes from slot, if they exist
+    status = serializers.CharField(source='slot.status', read_only=True)
+    notes = serializers.CharField(source='slot.notes', read_only=True)
+
+    class Meta:
+        model = BookAppointmentSlot
+        fields = [
+            'id',
+            'patient',
+            'patient_name',
+            'doctor_name',
+            'date',
+            'start_time',
+            'end_time',
+            'status',
+            'notes',
+            'phone',
+            'symptoms',
+            'booked_at',
+        ]
+class DoctorAppointmentSerializer(serializers.ModelSerializer):
+    patient_name = serializers.CharField(source='patient.username', read_only=True) #since the patient is the userid in BookAppointmentSlot model that is pointing to the User model,so since the username feild is not directly state in BookAppointmentSlot model we can pull it from the User model through patient id
+    doctor_name = serializers.CharField(source='slot.doctor.user.username', read_only=True)
+    date = serializers.DateTimeField(source='slot.date', read_only=True)
+    start_time = serializers.TimeField(source='slot.start_time', read_only=True)
+    end_time = serializers.TimeField(source='slot.end_time', read_only=True)
+    # status and notes from slot, if they exist
+    status = serializers.CharField(source='slot.status', read_only=True)
+    notes = serializers.CharField(source='slot.notes', read_only=True)
+
+    class Meta:
+        model = BookAppointmentSlot
+        fields = [
+            'id',
+            'patient',
+            'patient_name',
+            'doctor_name',
+            'date',
+            'start_time',
+            'end_time',
+            'status',
+            'notes',
+            'phone',
+            'symptoms',
+            'booked_at',
+        ]
+
+
 

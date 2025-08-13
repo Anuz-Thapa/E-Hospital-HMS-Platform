@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import './DoctorLogin.css';
-import { doctorlogin, login } from "../../utils/auth";
+import { doctorlogin, login, setAuthUser } from "../../utils/auth";
 import { useNavigate } from 'react-router-dom';
 
 
-const DoctorLogin = () => {
+const DoctorLogin = ({isLoggedIn,setIsLoggedIn}) => {
 
   const navigate=useNavigate()
   const [formData, setFormData] = useState({
@@ -81,6 +81,9 @@ const DoctorLogin = () => {
     setIsLoading(false);
     } else {
     console.log("Login successful:", data);
+    // setAuthUser(data.access, data.refresh);
+    localStorage.setItem("isLoggedIn", "true");
+    setIsLoggedIn(true);
     localStorage.setItem("doctorId", data.doctor_id);
     navigate("/Doctordashboard");
     }
@@ -90,7 +93,7 @@ const DoctorLogin = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h2 className="login-title">Welcome Back</h2>
+          <h2 className="login-title">Welcome Back Doctor</h2>
           <p className="login-subtitle">Please sign in to your account</p>
         </div>
         

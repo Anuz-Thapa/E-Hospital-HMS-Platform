@@ -152,21 +152,32 @@ import DoctorDashboard from "./Components/DoctorDashboard/DoctorDashboard";
 import Appointment from "./Components/Appointments/Appointment";
 import DoctorRegister from "./Components/DoctorRegister/DoctorRegister";
 import DoctorLogin from "./Components/DoctorLogin/DoctorLogin";
+// import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
+import { useState } from "react";
+import ProfileView from "./Components/Profile/Profile";
 
 const App = () => {
+  // if usestate is defined in the App.jsx component then it will be shared across all the components in the app
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem("isLoggedIn") === "true";
+  });
   return (
     <Routes>
-      <Route element={<Layout />}>
+      <Route element={<Layout isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>}>
         <Route path="/" element={<Main />} />
         <Route path="/askai" element={<AskAI />} />
+        {/* <Route element={<ProtectedRoute isLoggedIn={isLoggedIn} />}> */}
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/appointment" element={<Appointment />} />
+        {/* </Route> */}
         <Route path="/doctorRegister" element={<DoctorRegister />} />
         <Route path="/doctordashboard" element={<DoctorDashboard />} />
       </Route>
 
       {/* Routes that should NOT show Sidebar/Layout */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/PatientLogin" element={<Login isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>} />
+      <Route path="/DoctorLogin" element={<DoctorLogin isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>} />
+      <Route path="/Profile" element={<ProfileView isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>} />
       <Route path="/register" element={<Register />} />
       <Route path="/doctorLogin" element={<DoctorLogin />} />
     </Routes>

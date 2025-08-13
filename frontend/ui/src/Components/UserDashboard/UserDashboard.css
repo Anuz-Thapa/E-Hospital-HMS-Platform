@@ -9,7 +9,10 @@
 
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 50%, #f3e8ff 100%);
+  /* background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 50%, #f3e8ff 100%); */
+  /* background: linear-gradient(135deg, #3d69c7, #1d8ad8, #4338ca); */
+  background: linear-gradient(135deg, #3d69c7, #1d8ad8, #4338ca);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 

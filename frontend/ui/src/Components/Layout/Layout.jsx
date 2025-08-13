@@ -5,15 +5,37 @@ import { Menu, Heart } from 'lucide-react';
 
 import Sidebar from '../Sidebar/Sidebar';
 import './Layout.css'; // Create as needed
-
-const Layout = () => {
+import Swal from 'sweetalert2';
+import ProfileView from '../Profile/Profile';
+const Layout = ({isLoggedIn,setIsLoggedIn}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false); 
   const navigate = useNavigate();
   const location = useLocation();
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  const onLoginClick = () => navigate("/login");
+  const onPatientLoginClick = () => navigate("/PatientLogin");
+  const onDoctorLoginClick = () => navigate('/DoctorLogin');
+  const onProfileClick = () => setShowProfile(true);
+  // const onProfileClick =() => navigate("/Profile");
   const onRegisterClick = () => navigate("/register");
   const isHome = location.pathname === '/';
+
+  const handleLogout = () => {
+    // Clear login state
+    setIsLoggedIn(false);
+    // Optional: remove from localStorage if using persistence
+    localStorage.removeItem("userId");
+    localStorage.removeItem("isLoggedIn");
+    Swal.fire({
+      title: 'Logout Successfull!',
+      text: 'you have been logged out successfully',
+      icon: 'success',
+      confirmButtonText: 'OK',
+      });
+    // Navigate to login or home
+    navigate("/");
+  };
+
   return (
     <div className="app-container">
       {/* Desktop Header */}
@@ -41,10 +63,36 @@ const Layout = () => {
               </button>
             </div>
           </div>
-          <div className="desktop-auth-buttons">
-            <button onClick={onLoginClick} className="desktop-auth-btn desktop-login-btn">Login</button>
+          {!isLoggedIn ? <div className="desktop-auth-buttons">
+            <div className="login-dropdown">
+            <button className="desktop-auth-btn desktop-login-btn">Login</button>
+            <div className="login-dropdown-content">
+              <button onClick={onDoctorLoginClick}>Doctor Login</button>
+              <button onClick={onPatientLoginClick}>Patient Login</button>
+            </div>
+            </div>
             <button onClick={onRegisterClick} className="desktop-auth-btn desktop-register-btn">Register</button>
-          </div>
+          </div> :
+          <div className="desktop-auth-buttons">
+          <button onClick={handleLogout} className="desktop-auth-btn desktop-login-btn">Logout</button>
+          {/* <button onClick={onProfileClick} className="desktop-auth-btn desktop-register-btn">Profile</button> */}
+          <img
+            src={"/default-avatar.avif"}
+            alt="Profile"
+            className="profile-image-btn"
+            onClick={onProfileClick}
+            style={{
+              width: 45,
+              height: 45,
+              borderRadius: "50%",
+              cursor: "pointer",
+              border: "2px solid #2563eb",
+              objectFit: "cover",
+            }}
+          />
+        </div>
+          }
+
         </div>
       </header>
 
@@ -63,12 +111,18 @@ const Layout = () => {
       </>
       )}
 
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} isLoggedIn={isLoggedIn}/>
 
       {/* Page content injected here */}
       <main className="main-content">
         <Outlet />
       </main>
+      {/* Profile Sidebar */}
+      {showProfile && (
+        <ProfileView
+          onClose={() => setShowProfile(false)} // Pass function to close sidebar
+        />
+      )}
     </div>
   );
 };

@@ -7,7 +7,8 @@
 
 .doctor-login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  background: linear-gradient(135deg, #3d69c7, #1d8ad8, #4338ca);
   display: flex;
   align-items: center;
   justify-content: center;

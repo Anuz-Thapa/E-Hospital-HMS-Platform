@@ -3,7 +3,7 @@ import { useState } from "react";
 // import AskAI from "../Components/AskAI/AskAI";
 import './Sidebar.css'
 import { useLocation, useNavigate } from "react-router-dom";
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar,isLoggedIn }) => {
   const menuItems = [
     { icon: Home, text: 'Home', id: 'home' },
     { icon: Stethoscope, text: 'Appointments', id: 'appointment' },
@@ -23,7 +23,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       navigate('/AskAI')
     }
     else if (id==="dashboard"){
-      navigate("/login")
+      if(isLoggedIn){
+        navigate("/dashboard")}
+      else{
+        navigate("/login")
+      }
     }
     else if(id==="appointment"){
       navigate('/appointment')

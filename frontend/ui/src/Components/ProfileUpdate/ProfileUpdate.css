@@ -1,0 +1,67 @@
+.profile-update-form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f9fafb;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .profile-update-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2563eb;
+  }
+  
+  .profile-update-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .profile-update-form input[type="text"],
+  .profile-update-form input[type="file"],
+  .profile-update-form input[type="password"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+  }
+  
+  .profile-update-form input[type="text"]:focus,
+  .profile-update-form input[type="file"]:focus,
+  .profile-update-form input[type="password"]:focus {
+    border-color: #2563eb;
+    outline: none;
+  }
+  
+  .profile-update-form button {
+    background-color: #2563eb;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .profile-update-form button:hover {
+    background-color: #1e40af;
+  }
+  
+  .profile-update-form .image-preview {
+    display: block;
+    margin: 10px auto 20px;
+    max-width: 150px;
+    border-radius: 50%;
+    border: 2px solid #2563eb;
+  }
+  

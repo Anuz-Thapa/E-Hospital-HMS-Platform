@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, Plus, Edit, Trash2, Eye, Phone, Mail, MapPin, Activity, AlertCircle, CheckCircle } from 'lucide-react';
 import './DoctorDashboard.css';
-import { setAppointmentSlots } from '../../utils/auth';
+import { getDoctorAppointments, setAppointmentSlots } from '../../utils/auth';
 import Swal from 'sweetalert2';
+import Cookies from 'js-cookie';
+import {jwtDecode} from 'jwt-decode';
 
 const DoctorDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -15,47 +17,72 @@ const DoctorDashboard = () => {
   
   const doctorId = localStorage.getItem("doctorId");
 
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      patient: 'John Smith',
-      time: '09:30',
-      date: '2025-06-10',
-      type: 'Consultation',
-      status: 'confirmed',
-      phone: '+1-555-0123',
-      email: 'john.smith@email.com',
-      notes: 'Follow-up for diabetes management'
-    },
-    {
-      id: 2,
-      patient: 'Sarah Johnson',
-      time: '14:00',
-      date: '2025-06-11',
-      type: 'Check-up',
-      status: 'pending',
-      phone: '+1-555-0456',
-      email: 'sarah.j@email.com',
-      notes: 'Annual physical examination'
-    },
-    {
-      id: 3,
-      patient: 'Michael Brown',
-      time: '10:15',
-      date: '2025-06-09',
-      type: 'Emergency',
-      status: 'completed',
-      phone: '+1-555-0789',
-      email: 'mbrown@email.com',
-      notes: 'Chest pain evaluation'
-    }
-  ]);
+  const [appointments, setAppointments] = useState([])
+  useEffect(() => {
+    const fetchDoctorAppointments = async () => {
+      const token = Cookies.get("access_token");
+      let userid=null;
+      if (token) {
+          const decoded = jwtDecode(token);
+          userid = decoded.user_id || decoded.id || decoded.sub; // depends on your token structure
+          console.log("Current user ID:", userid); }
+      
+      if (!userid) {
+            console.log("No valid user ID found, skipping fetch");
+            return; // avoid calling API without user ID
+          }
 
-  const [newSlot, setNewSlot] = useState({
-    date: '',
-    time: '',
-    duration: 30
-  });
+      const { data, error } = await getDoctorAppointments(userid);   //dict containing data and error will be received 
+      if (error) {
+        console.log("Fetch error:", error);
+      } else {
+        setAppointments(data); // assuming you have a state variable like const [doctors, setDoctors] = useState([]);
+        console.log(data)
+      }
+    };
+
+    fetchDoctorAppointments();
+  }, []);
+  //   {
+  //     id: 1,
+  //     patient: 'John Smith',
+  //     time: '09:30',
+  //     date: '2025-06-10',
+  //     type: 'Consultation',
+  //     status: 'confirmed',
+  //     phone: '+1-555-0123',
+  //     email: 'john.smith@email.com',
+  //     notes: 'Follow-up for diabetes management'
+  //   },
+  //   {
+  //     id: 2,
+  //     patient: 'Sarah Johnson',
+  //     time: '14:00',
+  //     date: '2025-06-11',
+  //     type: 'Check-up',
+  //     status: 'pending',
+  //     phone: '+1-555-0456',
+  //     email: 'sarah.j@email.com',
+  //     notes: 'Annual physical examination'
+  //   },
+  //   {
+  //     id: 3,
+  //     patient: 'Michael Brown',
+  //     time: '10:15',
+  //     date: '2025-06-09',
+  //     type: 'Emergency',
+  //     status: 'completed',
+  //     phone: '+1-555-0789',
+  //     email: 'mbrown@email.com',
+  //     notes: 'Chest pain evaluation'
+  //   }
+  // ]);
+
+  // const [newSlot, setNewSlot] = useState({
+  //   date: '',
+  //   time: '',
+  //   duration: 30
+  // });
 
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
@@ -245,7 +272,7 @@ const DoctorDashboard = () => {
               {appointments.map(appointment => (
                 <div key={appointment.id} className="appointment-card">
                   <div className="appointment-header">
-                    <h3>{appointment.patient}</h3>
+                    <h3>{appointment.patient_name}</h3>
                     <span className={`appointment-status ${getStatusColor(appointment.status)}`}>
                       {appointment.status}
                     </span>
@@ -254,7 +281,7 @@ const DoctorDashboard = () => {
                   <div className="appointment-info">
                     <div className="info-row">
                       <Calendar size={16} />
-                      <span>{appointment.date} at {appointment.time}</span>
+                      <span>{appointment.date} at {appointment.start_time}</span>
                     </div>
                     <div className="info-row">
                       <Activity size={16} />

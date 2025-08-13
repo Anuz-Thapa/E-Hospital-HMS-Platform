@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   User, 
   Calendar, 
@@ -17,11 +17,14 @@ import {
   Pill
 } from 'lucide-react';
 import './UserDashboard.css';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie'
 import { useLocation } from 'react-router-dom';
-
+import { getUserAppointments } from '../../utils/auth';
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const location = useLocation();
+  const [appointments,setAppointments]=useState([])
   const username = location.state?.username;
   // Sample data
   const userInfo = {
@@ -33,64 +36,90 @@ const UserDashboard = () => {
     phone: "+1 (555) 123-4567",
     email: "sarah.johnson@email.com",
     address: "123 Health St, Medical City, MC 12345"
-  };
+  }; //doctors is the list of dict
 
-  const appointments = [
-    {
-      id: 1,
-      doctor: "Dr. Smith",
-      specialty: "Cardiology",
-      date: "2025-06-15",
-      time: "10:00 AM",
-      status: "Upcoming",
-      type: "Check-up"
-    },
-    {
-      id: 2,
-      doctor: "Dr. Davis",
-      specialty: "General Medicine",
-      date: "2025-06-20",
-      time: "2:30 PM",
-      status: "Scheduled",
-      type: "Follow-up"
-    },
-    {
-      id: 3,
-      doctor: "Dr. Wilson",
-      specialty: "Dermatology",
-      date: "2025-05-28",
-      time: "11:15 AM",
-      status: "Completed",
-      type: "Consultation"
-    }
-  ];
+  useEffect(() => {
+    const fetchUserAppointments = async () => {
+      const token = Cookies.get("access_token");
+      let userid=null;
+      if (token) {
+          const decoded = jwtDecode(token);
+          userid = decoded.user_id || decoded.id || decoded.sub; // depends on your token structure
+          console.log("Current user ID:", userid); }
+      
+      if (!userid) {
+            console.log("No valid user ID found, skipping fetch");
+            return; // avoid calling API without user ID
+          }
 
-  const medicalReports = [
-    {
-      id: 1,
-      title: "Blood Test Results",
-      date: "2025-05-20",
-      doctor: "Dr. Smith",
-      type: "Lab Report",
-      status: "Normal"
-    },
-    {
-      id: 2,
-      title: "Chest X-Ray",
-      date: "2025-05-15",
-      doctor: "Dr. Johnson",
-      type: "Imaging",
-      status: "Normal"
-    },
-    {
-      id: 3,
-      title: "Annual Physical Exam",
-      date: "2025-04-30",
-      doctor: "Dr. Davis",
-      type: "Examination",
-      status: "Complete"
-    }
-  ];
+      const { data, error } = await getUserAppointments(userid);   //dict containing data and error will be received 
+      if (error) {
+        console.log("Fetch error:", error);
+      } else {
+        setAppointments(data); // assuming you have a state variable like const [doctors, setDoctors] = useState([]);
+        console.log(data)
+      }
+    };
+
+    fetchUserAppointments();
+  }, []);
+
+  // const appointments = [
+  //   {
+  //     id: 1,
+  //     doctor: "Dr. Smith",
+  //     specialty: "Cardiology",
+  //     date: "2025-06-15",
+  //     time: "10:00 AM",
+  //     status: "Upcoming",
+  //     type: "Check-up"
+  //   },
+  //   {
+  //     id: 2,
+  //     doctor: "Dr. Davis",
+  //     specialty: "General Medicine",
+  //     date: "2025-06-20",
+  //     time: "2:30 PM",
+  //     status: "Scheduled",
+  //     type: "Follow-up"
+  //   },
+  //   {
+  //     id: 3,
+  //     doctor: "Dr. Wilson",
+  //     specialty: "Dermatology",
+  //     date: "2025-05-28",
+  //     time: "11:15 AM",
+  //     status: "Completed",
+  //     type: "Consultation"
+  //   }
+  // ];
+
+  // const medicalReports = [
+  //   {
+  //     id: 1,
+  //     title: "Blood Test Results",
+  //     date: "2025-05-20",
+  //     doctor: "Dr. Smith",
+  //     type: "Lab Report",
+  //     status: "Normal"
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Chest X-Ray",
+  //     date: "2025-05-15",
+  //     doctor: "Dr. Johnson",
+  //     type: "Imaging",
+  //     status: "Normal"
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Annual Physical Exam",
+  //     date: "2025-04-30",
+  //     doctor: "Dr. Davis",
+  //     type: "Examination",
+  //     status: "Complete"
+  //   }
+  // ];
 
   const vitals = {
     heartRate: 72,
@@ -235,12 +264,12 @@ const UserDashboard = () => {
                   Upcoming Appointments
                 </h3>
                 <div className="appointments-list">
-                  {appointments.slice(0, 2).map(apt => (
+                  {appointments?.slice(0, 2).map(apt => (
                     <div key={apt.id} className="appointment-item">
                       <div className="appointment-info">
-                        <p className="appointment-doctor">{apt.doctor}</p>
+                        <p className="appointment-doctor">{apt.doctor_name || apt.doctor}</p>
                         <p className="appointment-specialty">{apt.specialty}</p>
-                        <p className="appointment-datetime">{apt.date} at {apt.time}</p>
+                        <p className="appointment-datetime">{apt.date} at {apt.start_time || apt.time}</p>
                       </div>
                       <span className={`status-badge ${apt.status === 'Upcoming' ? 'status-upcoming' : 'status-scheduled'}`}>
                         {apt.status}
@@ -283,7 +312,7 @@ const UserDashboard = () => {
               </button>
             </div>
             <div className="appointments-full-list">
-              {appointments.map(apt => (
+              {appointments && appointments.map(apt => (
                 <div key={apt.id} className="appointment-card">
                   <div className="appointment-card-content">
                     <div className="appointment-card-left">
@@ -291,7 +320,7 @@ const UserDashboard = () => {
                         <User size={20} />
                       </div>
                       <div className="appointment-details">
-                        <h4 className="doctor-name">{apt.doctor}</h4>
+                        <h4 className="doctor-name">{apt.doctor_name}</h4>
                         <p className="doctor-specialty">{apt.specialty}</p>
                         <div className="appointment-meta">
                           <span className="meta-item">

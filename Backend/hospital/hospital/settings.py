@@ -63,6 +63,12 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'authorization',
+    'content-type',
+    # ... other headers
+]
 CORS_ALLOW_ALL_ORIGINS = True 
 
 ROOT_URLCONF = 'hospital.urls'

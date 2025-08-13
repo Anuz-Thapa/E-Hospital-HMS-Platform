@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import apiInstance from './axios';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from "js-cookie";
-// import axios from 'axios'; // Remove or comment out this line as it's no longer needed for API calls
+import { API_BASE_URL } from './constants';
+import axios from 'axios'; // Remove or comment out this line as it's no longer needed for API calls
 import Swal from "sweetalert2";
 import { useAuthStore } from '../store/auth';
+import useAxios from './useAxios';
 // import { Cookie } from 'lucide-react';
 // authentication functions in reactjs
 
@@ -77,6 +79,18 @@ export const register = async (full_name,email,password,password2) =>{
         };
     }
 };
+export const getUserProfile = async(userid) =>{
+  try{
+  const {data}=await useAxios().get(`user/profile?user=${userid}`)
+  return {data,error:null}
+  }
+  catch(error){
+    console.error("failed to fetch user profile",error.response?.data || error.message);
+    return {data:null,error:error.response?.data.detail || "Something went wrong"
+    }
+  }
+
+}
 // export const DoctorRegister = async(username,first_name,last_name,email,password,age,position,certifications,consultation_fee,experience_years,specialization,education,description)=>{
 export const Doctorregister= async (doctorData) => {
 //   const doctorData = {
@@ -134,7 +148,7 @@ export const doctorlogin = async (username, password) => {
     console.log(status)
     if (status === 200) {
       console.log(status)
-    //   setAuthUser(data.access, data.refresh);
+      setAuthUser(data.access, data.refresh);
     //   alert("Login Successful");
       Swal.fire({
             title: 'LoggedIn Successfully!',
@@ -252,14 +266,14 @@ export const bookAppointmentSlot = async (slot_id,data) => {
   try {
     const token = Cookies.get("access_token");
     console.log(token)
-    const response = await apiInstance.post(
+    const response = await useAxios().post(
       `/appointment-slot/${slot_id}/book`, // ✅ Correct URL
       data, // Body (if any data needed)
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ Auth header
-        },
-      }
+      // {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`, // ✅ Auth header #if using useAxios this is automatically handled by it
+      //   },
+      // }
     );
 
     return { data: response.data, error: null };
@@ -272,10 +286,32 @@ export const bookAppointmentSlot = async (slot_id,data) => {
   }
 };
 
+export const getUserAppointments =async(userid) =>{
+  try{
+    const token=Cookies.get("access_token")
+    const response=await useAxios().get(`user/Appointments/?user=${userid}`)
+    return {data:response.data,error:null}
+  }
+  catch(error){
+    console.error("failed to fetch slots",error.response?.data || error.message);
+    return {data:null,error:error.response?.data.detail || "Something went wrong"
+    }
+  }
+}
 
-
-
-
+export const getDoctorAppointments =async(doctorid) =>{
+  try{
+    const token=Cookies.get("access_token")
+    const response=await useAxios().get(`doctor/Appointments/?doctor=${doctorid}`)
+    console.log(response)
+    return {data:response.data,error:null}
+  }
+  catch(error){
+    console.log("failed to fetch appointments",error.response?.data || error.message);
+    return{data:null,error:error.response?.data.detail || "something went wrong"}
+    
+  }
+}
 
 
 
@@ -313,12 +349,13 @@ export const setUser =async ()=>{
 export const setAuthUser = (access_token,refresh_token)=>{  //set the access and refresh token in cookie
     Cookies.set("access_token",access_token,{
         expires:1,
-        secure:true,
+        secure:false,
     });
+    if(refresh_token){
     Cookies.set("refresh_token",refresh_token,{
         expires:7,
-        secure:true 
-    });
+        secure:false 
+    });}
     // const user=jwt_decode(access_token) ?? null  //Decodes the JWT access token to extract the user info.
     const user = jwtDecode(access_token) ?? null;
     if (user){
@@ -331,19 +368,21 @@ export const setAuthUser = (access_token,refresh_token)=>{  //set the access and
 // // the endpoint takes the parameters i.e.refresh token to the refresh token page where there is feild that is seeking for token.
 export const getRefreshedToken = async() => {
       const refresh_token=Cookies.get("refresh_token")
-      const response=await axios.post(`/token/refresh/`,{
+      const response=await axios.post(`http://127.0.0.1:8000/user/token/refresh/`,{
                refresh:refresh_token,
       });
       return response.data;
 };
 
 export const isAccessTokenExpired=()=>{
-  try{
-    // const decodedToken=jwt_decode(access_token)
-    const decodedToken=jwtDecode(access_token)
-    return decodedToken.exp < Date.now()/1000;
-  }catch(error){
-    return true;
+  try {
+    const access_token = Cookies.get("access_token");
+    if (!access_token) return true; // no token means expired/not present
+    
+    const decodedToken = jwtDecode(access_token);
+    return decodedToken.exp < Date.now() / 1000; // true if expired
+  } catch (error) {
+    return true; // if token invalid or decode error, treat as expired
   }
 };
 
@@ -361,3 +400,7 @@ export const isAccessTokenExpired=()=>{
           // path('appointment-slot/<int:doctorid>/display', AvailableAppointmentSlotListView.as_view())
               //  doctor_id = self.kwargs.get('doctorid')
 
+
+
+          // cop , cop@12345
+          // kami123 , cricket345

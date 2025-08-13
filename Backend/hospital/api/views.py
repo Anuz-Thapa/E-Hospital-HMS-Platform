@@ -70,9 +70,11 @@ class DoctorLoginView(APIView):
 
         # If using token authentication
         # token, created = Token.objects.get_or_create(user=user)
-
+        refresh = RefreshToken.for_user(user)
         return Response({
             # "token": token.key,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
             "doctor_id": doctor.id,
             "username": user.username,
             "email": user.email
@@ -125,15 +127,49 @@ class LoginView(APIView):
 
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ProfileAPIView(generics.RetrieveUpdateAPIView):
-    serializer_class = api_serializer.ProfileSerializer
-    permission_classes = [AllowAny]
+# class ProfileAPIView(generics.RetrieveUpdateAPIView):
+#     serializer_class = api_serializer.ProfileSerializer
+#     permission_classes = [AllowAny]
 
-    def get_object(self):  #override get_object function
-        user_id = self.kwargs['user_id']
-        user = User.objects.get(id=user_id)
-        return Profile.objects.get(user=user)   #returns the profile for the user
+#     def get_object(self):  #override get_object function
+#         user_id = self.kwargs['user_id']
+#         user = User.objects.get(id=user_id)
+#         return Profile.objects.get(user=user)   #returns the profile for the user
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = api_serializer.UserProfileSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_object(self):
+        # Return the logged-in user object
+        return self.request.user
+class UserProfileUpdateView(generics.UpdateAPIView):
+    serializer_class = api_serializer.UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+class PasswordChangeView(generics.UpdateAPIView):
+    serializer_class = api_serializer.PasswordChangeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        old_password = serializer.validated_data['old_password']
+        new_password = serializer.validated_data['new_password']
+
+        if not user.check_password(old_password):
+            return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+        return Response({"detail": "Password updated successfully."})
 
 class AiModelView(APIView):
     parser_classes = [JSONParser,MultiPartParser, FormParser]
@@ -304,3 +340,18 @@ class BookAppointmentSlotView(generics.CreateAPIView):
             return Response({"detail": "Appointment booked successfully."}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# anuz 12345
+class UserAppointmentsView(generics.ListAPIView):
+    serializer_class=api_serializer.UserAppointmentSerializer
+    permission_classes=[AllowAny]
+    def get_queryset(self):
+        user_id=self.request.query_params.get('user',None)
+        queryset=BookAppointmentSlot.objects.filter(patient=user_id)
+        return queryset.order_by('slot__date', 'slot__start_time')
+class DoctorAppointmentsView(generics.ListAPIView):
+    serializer_class=api_serializer.DoctorAppointmentSerializer
+    permission_classes=[AllowAny]
+    def get_queryset(self):
+        doctor_id=self.request.query_params.get('doctor',None)
+        queryset=BookAppointmentSlot.objects.filter(slot__doctor__user__id=doctor_id)
+        return queryset.order_by('slot__date', 'slot__start_time')

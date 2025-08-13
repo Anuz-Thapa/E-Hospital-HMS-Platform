@@ -3,7 +3,7 @@ import './Login.css';
 import { login } from "../../utils/auth";
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Login = ({isLoggedIn,setIsLoggedIn}) => {
   const navigate=useNavigate()
   const [formData, setFormData] = useState({
     username: '',
@@ -79,7 +79,9 @@ const Login = () => {
     setIsLoading(false);
     } else {
     console.log("Login successful:", data);
+    localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userId", data.user.id);
+    setIsLoggedIn(true);
     navigate("/dashboard");
     }
     }

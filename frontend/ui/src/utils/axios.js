@@ -12,7 +12,8 @@ Accept:'application/json'
 })
 export default apiInstance
 
-
+// here there is not interception to check whether the token has expired
+// suitable for simple request response without token overhead
 // the backend django server must already be running at http://127.0.0.1:8000/,so ,http://127.0.0.1:8000/api/v1/, acts as a base url for apicall as set in constant.js
 
 // Axios is commonly used to connect a React frontend with a Django backend, especially when Django is serving an API via Django REST Framework (DRF).

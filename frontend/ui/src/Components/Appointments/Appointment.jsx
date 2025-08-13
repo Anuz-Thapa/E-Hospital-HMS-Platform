@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { SquareArrowLeft } from 'lucide-react';
 import { bookAppointmentSlot, getAvailableSlots, getDoctors } from '../../utils/auth';
 import Swal from 'sweetalert2';
-
+// can choose for physical or virtual appointment
 const Appointment = () => {
   const [selectedDoctorSlots, setSelectedDoctorSlots] = useState(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
@@ -38,8 +38,9 @@ const Appointment = () => {
 
   const handleDoctorSelect = async(doctor) => {
     // const slot=await getAvailableSlots(doctor.id)   //slot is the list of dict
+    console.log(doctor.id)
     const { data, error } = await getAvailableSlots(doctor.id);
-
+    console.log(doctor.id)
     if (error) {
     console.error("Error fetching slots:", error);
   } else {
@@ -131,11 +132,11 @@ const Appointment = () => {
       </div>
 
         {/* also can be done using appointmentslots feild in doctor model */}
-      {selectedDoctorSlots && (
+      {selectedDoctorSlots && selectedDoctorSlots.length>0 ? (
         <div className="time-slots-section">
-          <h2>Available Time Slots for {selectedDoctorSlots[0].doctor_name}</h2>
+          <h2>Available Time Slots for {selectedDoctorSlots[0]?.doctor_name}</h2>
           <div className="time-slots-grid">
-            {selectedDoctorSlots.map((slot, index) => (
+            {selectedDoctorSlots?.map((slot, index) => (
               <button
                 key={index}
                 className={`time-slot ${selectedTimeSlot === slot.start_time ? 'selected' : ''}`}
@@ -146,7 +147,10 @@ const Appointment = () => {
             ))}
           </div>
         </div>
-      )}
+      ):( <div className="time-slots-section">
+      <h2>No Available Time Slots found!</h2>
+    </div>
+     ) }
 {/* slot,patient,phone,symptoms,bookedat */}
       {showBookingForm && (
         <div className="booking-form-section">

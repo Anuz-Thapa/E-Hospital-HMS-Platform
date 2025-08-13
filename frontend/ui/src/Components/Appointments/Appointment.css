@@ -34,11 +34,10 @@
   opacity: 0.9;
   font-weight: 300;
 }
-
-.doctors-grid {
+/* .doctors-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
   margin-bottom: 3rem;
 }
 
@@ -46,12 +45,46 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid transparent;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+} */
+.doctors-grid {
+  display: flex;                /* Use flexbox instead of grid */
+  gap: 1rem;                     /* Space between cards */
+  overflow-x: auto;              /* Enables horizontal scroll */
+  padding-bottom: 1rem;          /* Space for scroll bar */
+  scroll-behavior: smooth;       /* Smooth scrolling */
 }
+
+.doctors-grid::-webkit-scrollbar {
+  height: 8px;                   /* Thin horizontal scrollbar */
+}
+
+.doctors-grid::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.6); /* Scrollbar color */
+  border-radius: 10px;
+}
+
+.doctors-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.doctor-card {
+  flex: 0 0 auto;                 /* Prevent flex items from shrinking */
+  width: 256px;   
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);                /* Fixed card width */
+}
+
 
 .doctor-card:hover {
   transform: translateY(-5px);
